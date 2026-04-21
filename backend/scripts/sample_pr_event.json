@@ -1,0 +1,13 @@
+{
+  "action": "opened",
+  "installation": {
+    "id": 12345678
+  },
+  "pull_request": {
+    "number": 42,
+    "title": "POC test PR"
+  },
+  "repository": {
+    "full_name": "org/repo"
+  }
+}
