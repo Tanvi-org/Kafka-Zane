@@ -28,9 +28,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from app.db.redis_client import (
-    get_cached_tenant_id,
-    set_cached_tenant_id,
-    invalidate_tenant_cache,
+    get_cached_tenant_id_sync,
+    set_cached_tenant_id_sync,
+    invalidate_tenant_cache_sync,
 )
 
 logger = logging.getLogger("services.tenant_resolver")
@@ -65,14 +65,14 @@ class TenantResolver:
         logger.info("Resolving tenant | installation_id=%s", installation_id)
 
         # ── 1. Redis cache ────────────────────────────────────────────────────
-        tenant_id = get_cached_tenant_id(installation_id)
+        tenant_id = get_cached_tenant_id_sync(installation_id)
         if tenant_id:
             if not self._is_uuid(tenant_id):
                 logger.warning(
                     "Tenant ID in cache is not UUID; invalidating cache | installation_id=%s tenant_id=%s",
                     installation_id, tenant_id,
                 )
-                invalidate_tenant_cache(installation_id)
+                invalidate_tenant_cache_sync(installation_id)
                 tenant_id = None
             else:
                 logger.info(
@@ -96,7 +96,7 @@ class TenantResolver:
                 "Tenant resolved from DB | installation_id=%s tenant_id=%s",
                 installation_id, tenant_id,
             )
-            set_cached_tenant_id(installation_id, tenant_id)
+            set_cached_tenant_id_sync(installation_id, tenant_id)
             return tenant_id
 
         # ── 3. Auto-onboard (missed installation.created event) ───────────────
@@ -105,7 +105,7 @@ class TenantResolver:
         )
         tenant_id = self._auto_onboard(installation_id)
         if tenant_id:
-            set_cached_tenant_id(installation_id, tenant_id)
+            set_cached_tenant_id_sync(installation_id, tenant_id)
             logger.info(
                 "Tenant auto-onboarded | installation_id=%s tenant_id=%s",
                 installation_id, tenant_id,

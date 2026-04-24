@@ -57,6 +57,21 @@ services:
       timeout: 5s
       retries: 5
 
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: qg_redis_insight
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "5540:5540"
+    environment:
+      REDISINSIGHT_LOGFILE: ""
+      REDISINSIGHT_LOGLEVEL: "info"
+    volumes:
+      - redis_insight_data:/data
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
     container_name: qg_zookeeper
@@ -160,3 +175,4 @@ volumes:
   postgres_data:
   zookeeper_data:
   kafka_data:
+  redis_insight_data:
